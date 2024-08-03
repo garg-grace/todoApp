@@ -1,7 +1,7 @@
-const express = require("express");
-const jwt = require("jsonwebtoken");
-const {authenticateJwt, SECRET} = require("../middleware/index");
-const {User} = require("../db");
+import express from "express";
+import jwt from "jsonwebtoken";
+import {authenticateJwt, SECRET} from "../middleware/index";
+import {User} from "../db";
 const router = express.Router();
 
 
@@ -32,7 +32,8 @@ router.post('/login',async (req,res)=>{
 });
 
 router.get('/me',authenticateJwt,async (req,res)=>{
-    const user = await User.findOne({_id:req.userId});
+    const userId = req.headers["userId"];
+    const user = await User.findOne({userId});
 
     if(user){
         res.json({username:user.username});
@@ -41,4 +42,4 @@ router.get('/me',authenticateJwt,async (req,res)=>{
     }
 });
 
-module.exports =router
+export default router;
