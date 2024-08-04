@@ -1,12 +1,16 @@
 import express from "express";
 import {authenticateJwt,SECRET} from "../middleware/index";
 import {Todo} from "../db";
+import { CustomRequest } from "../types";
 const router = express.Router();
 
-router.post('/todos',authenticateJwt,(req,res)=>{
+
+router.post('/todos',authenticateJwt,(req:CustomRequest,res)=>{
+    
     const {title,description} = req.body;
     const done = false;
-    const userId = req.headers["userId"];
+    const userId = req.userId;
+    
 
     const newTodo = new Todo({title,description,done,userId});
     
@@ -16,14 +20,14 @@ router.post('/todos',authenticateJwt,(req,res)=>{
         
     })
     .catch((err)=>{
-        console.log("hi44");
+        
         res.status(500).json({err:'Failed to create a new todo'});
     });
     
 });
 
-router.get('/todos',authenticateJwt,(req,res)=>{
-    const userId = req.headers["userId"];
+router.get('/todos',authenticateJwt,(req:CustomRequest,res)=>{
+    const userId = req.userId;
 
     Todo.find({userId})
         .then((todos)=>{
@@ -34,9 +38,9 @@ router.get('/todos',authenticateJwt,(req,res)=>{
         });
 });
 
-router.patch('/todos/:todoId/done',authenticateJwt,(req,res)=>{
+router.patch('/todos/:todoId/done',authenticateJwt,(req:CustomRequest,res)=>{
     const {todoId} = req.params;
-    const userId = req.headers["userId"];
+    const userId = req.userId;
 
     Todo.findOneAndUpdate({_id:todoId,userId},{done:true},{new:true})
         .then((updatedTodo)=>{

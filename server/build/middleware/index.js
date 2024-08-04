@@ -15,12 +15,12 @@ const authenticateJwt = (req, res, next) => {
                 return res.sendStatus(403);
             }
             // Assuming user is a JwtPayload and has an 'id' property
-            if (typeof user !== "string" && "id" in user) {
-                req.headers["userId"] = user.id;
-                next();
+            if (typeof user !== "string") {
+                req.userId = user.id;
+                return next();
             }
             else {
-                res.sendStatus(403);
+                return res.sendStatus(403);
             }
             // if(err){
             //     return res.sendStatus(403);
@@ -32,11 +32,11 @@ const authenticateJwt = (req, res, next) => {
             //     res.sendStatus(403);
             // }
             // req.headers["userId"] = user.id;
-            next();
+            // next();
         });
     }
     else {
-        res.sendStatus(401);
+        return res.sendStatus(401);
     }
 };
 exports.authenticateJwt = authenticateJwt;

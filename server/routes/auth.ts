@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import {authenticateJwt, SECRET} from "../middleware/index";
 import {User} from "../db";
 const router = express.Router();
+import { CustomRequest } from "../types";
 
 
 router.post('/signup',async (req,res)=>{
@@ -31,9 +32,11 @@ router.post('/login',async (req,res)=>{
     }
 });
 
-router.get('/me',authenticateJwt,async (req,res)=>{
-    const userId = req.headers["userId"];
-    const user = await User.findOne({userId});
+router.get('/me',authenticateJwt,async (req:CustomRequest,res)=>{
+    const userId = req.userId;
+    
+    const user = await User.findOne({_id:userId});
+    
 
     if(user){
         res.json({username:user.username});
