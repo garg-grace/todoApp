@@ -4,10 +4,24 @@ import {authenticateJwt, SECRET} from "../middleware/index";
 import {User} from "../db";
 const router = express.Router();
 import { CustomRequest } from "../types";
+import { z } from "zod";
 
+const reqInput = z.object({
+    username : z.string().min(1).max(20),
+    password:z.string().min(1).max(20)
+})
 
 router.post('/signup',async (req,res)=>{
-    const {username,password} = req.body;
+    const parsedInput = reqInput.safeParse(req.body);
+    if(!parsedInput.success){
+        res.status(411).json({
+            error:parsedInput.error
+        })
+        return;
+    }
+    const username = parsedInput.data.username;
+    const password = parsedInput.data.password;
+
     const user = await User.findOne({username});
 
     if(user){
@@ -21,7 +35,16 @@ router.post('/signup',async (req,res)=>{
 });
 
 router.post('/login',async (req,res)=>{
-    const {username,password} = req.body;
+    const parsedInput = reqInput.safeParse(req.body);
+    if(!parsedInput.success){
+        res.status(411).json({
+            error:parsedInput.error
+        })
+        return;
+    }
+    const username = parsedInput.data.username;
+    const password = parsedInput.data.password;
+    
     const user = await User.findOne({username,password});
 
     if(user){

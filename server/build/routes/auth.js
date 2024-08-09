@@ -17,8 +17,21 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const index_1 = require("../middleware/index");
 const db_1 = require("../db");
 const router = express_1.default.Router();
+const zod_1 = require("zod");
+const reqInput = zod_1.z.object({
+    username: zod_1.z.string().min(1).max(20),
+    password: zod_1.z.string().min(1).max(20)
+});
 router.post('/signup', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { username, password } = req.body;
+    const parsedInput = reqInput.safeParse(req.body);
+    if (!parsedInput.success) {
+        res.status(411).json({
+            error: parsedInput.error
+        });
+        return;
+    }
+    const username = parsedInput.data.username;
+    const password = parsedInput.data.password;
     const user = yield db_1.User.findOne({ username });
     if (user) {
         res.status(403).json({ message: 'User already exists' });
@@ -31,7 +44,15 @@ router.post('/signup', (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 }));
 router.post('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { username, password } = req.body;
+    const parsedInput = reqInput.safeParse(req.body);
+    if (!parsedInput.success) {
+        res.status(411).json({
+            error: parsedInput.error
+        });
+        return;
+    }
+    const username = parsedInput.data.username;
+    const password = parsedInput.data.password;
     const user = yield db_1.User.findOne({ username, password });
     if (user) {
         const token = jsonwebtoken_1.default.sign({ id: user._id }, index_1.SECRET, { expiresIn: '1h' });

@@ -6,9 +6,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const index_1 = require("../middleware/index");
 const db_1 = require("../db");
+const zod_1 = require("zod");
 const router = express_1.default.Router();
+let titleInputProps = zod_1.z.object({
+    title: zod_1.z.string().min(1),
+    description: zod_1.z.string().min(1),
+});
 router.post('/todos', index_1.authenticateJwt, (req, res) => {
-    const { title, description } = req.body;
+    const parsedInput = titleInputProps.safeParse(req.body);
+    if (!parsedInput.success) {
+        return res.status(411).json({
+            msg: parsedInput.error
+        });
+    }
+    let title = parsedInput.data.title;
+    let description = parsedInput.data.description;
     const done = false;
     const userId = req.userId;
     const newTodo = new db_1.Todo({ title, description, done, userId });

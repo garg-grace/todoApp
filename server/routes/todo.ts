@@ -2,12 +2,26 @@ import express from "express";
 import {authenticateJwt,SECRET} from "../middleware/index";
 import {Todo} from "../db";
 import { CustomRequest } from "../types";
+import {z} from "zod";
 const router = express.Router();
 
+let titleInputProps = z.object({
+    title: z.string().min(1),
+    description:z.string().min(1),
+})
 
 router.post('/todos',authenticateJwt,(req:CustomRequest,res)=>{
+
+    const parsedInput = titleInputProps.safeParse(req.body);
+
+    if(!parsedInput.success){
+        return res.status(411).json({
+            msg:parsedInput.error
+        })
+    }
     
-    const {title,description} = req.body;
+    let title = parsedInput.data.title;
+    let description = parsedInput.data.description;
     const done = false;
     const userId = req.userId;
     
